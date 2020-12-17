@@ -234,3 +234,88 @@ export function log({ title, data, warn = false, debug = false }: Object) {
   }
   /* eslint-enable */
 }
+
+/**
+ * Returns bounding rect of elements inside
+ *
+ * @public
+ * @param {Object}       elements
+ *
+ * @returns {Object}
+ */
+export function getBoundingElementsRect(
+  elements: HTMLElement[],
+): { top: number, left: number, width: number, height: number } {
+  if (elements.length === 0) {
+    return {};
+  }
+
+  const [firstElement, ...restElements] = elements;
+  const rect = firstElement.getBoundingClientRect();
+  const left = rect.left + window.scrollX;
+  const top = rect.top + window.scrollY;
+  const width = firstElement.offsetWidth;
+  const height = firstElement.offsetHeight;
+  const multiTargetRect = {
+    left,
+    top,
+    width,
+    height,
+  };
+
+  if (restElements.length === 0) return multiTargetRect;
+
+  restElements.forEach(el => {
+    const elRect = el.getBoundingClientRect();
+    const elRectGlobalLeft = elRect.left + window.scrollX;
+    const elRectGlobalTop = elRect.top + window.scrollY;
+
+    multiTargetRect.left > elRectGlobalLeft && (multiTargetRect.left = elRectGlobalLeft);
+    multiTargetRect.top > elRectGlobalTop && (multiTargetRect.top = elRectGlobalTop);
+    elRectGlobalLeft + el.offsetWidth > multiTargetRect.left + multiTargetRect.width &&
+      (multiTargetRect.width = elRectGlobalLeft + el.offsetWidth - multiTargetRect.left);
+    elRectGlobalTop + el.offsetHeight > multiTargetRect.top + multiTargetRect.height &&
+      (multiTargetRect.height = elRectGlobalTop + el.offsetHeight - multiTargetRect.top);
+  });
+
+  return multiTargetRect;
+}
+
+/**
+ * Returns bounding element rect with window boundary padding
+ *
+ * @public
+ * @param {Object}       elementRect
+ * @param {number}       padding
+ * @param {number}       spotlightPadding
+ *
+ * @returns {Object}
+ */
+export function getBoundingRectWithBoundaryPadding(
+  elementRect: { top: number, left: number, width: number, height: number },
+  padding: number = 0,
+  spotlightPadding: number = 0,
+): { top: number, left: number, width: number, height: number } {
+  let left = Math.round(elementRect.left - spotlightPadding);
+  let top = Math.round(elementRect.top - spotlightPadding);
+  const boundaryPaddingOffsetLeft = padding - left;
+  const boundaryPaddingOffsetTop = padding - top;
+  left = boundaryPaddingOffsetLeft > 0 ? padding : left;
+  top = boundaryPaddingOffsetTop > 0 ? padding : top;
+
+  let width = Math.round(elementRect.width + spotlightPadding * 2);
+  width = boundaryPaddingOffsetLeft > 0 ? width - boundaryPaddingOffsetLeft : width;
+  const right = left + width;
+  const boundaryPaddingOffsetRight =
+    padding - (((document.body && document.body.offsetWidth) || 0) - right);
+  width = boundaryPaddingOffsetRight > 0 ? width - boundaryPaddingOffsetRight : width;
+
+  let height = Math.round(elementRect.height + spotlightPadding * 2);
+  height = boundaryPaddingOffsetTop > 0 ? height - boundaryPaddingOffsetTop : height;
+  const bottom = top + height;
+  const boundaryPaddingOffsetBottom =
+    padding - (((document.body && document.body.offsetHeight) || 0) - bottom);
+  height = boundaryPaddingOffsetBottom > 0 ? height - boundaryPaddingOffsetBottom : height;
+
+  return { top, left, width, height };
+}

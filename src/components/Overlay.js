@@ -34,6 +34,7 @@ export default class JoyrideOverlay extends React.Component {
     lifecycle: PropTypes.string.isRequired,
     onClickOverlay: PropTypes.func.isRequired,
     placement: PropTypes.string.isRequired,
+    isMultiTarget: PropTypes.bool,
     spotlightClicks: PropTypes.bool.isRequired,
     spotlightPadding: PropTypes.number,
     styles: PropTypes.object.isRequired,
@@ -58,7 +59,6 @@ export default class JoyrideOverlay extends React.Component {
         });
       }
     }
-
     window.addEventListener('resize', this.handleResize);
   }
 
@@ -92,7 +92,6 @@ export default class JoyrideOverlay extends React.Component {
     this._isMounted = false;
 
     window.removeEventListener('mousemove', this.handleMouseMove);
-    window.removeEventListener('resize', this.handleResize);
 
     clearTimeout(this.resizeTimeout);
     clearTimeout(this.scrollTimeout);
@@ -102,13 +101,15 @@ export default class JoyrideOverlay extends React.Component {
   get spotlightStyles() {
     const { showSpotlight } = this.state;
     const {
-      disableScrollParentFix,
       spotlightClicks,
       spotlightPadding,
       styles,
       target,
+      disableScrollParentFix,
+      isMultiTarget,
     } = this.props;
-    const element = getElement(target);
+
+    const element = getElement(isMultiTarget ? '#react-joyride-selection' : target);
     const elementRect = getClientRect(element);
     const isFixedTarget = hasPosition(element);
     const top = getElementPosition(element, spotlightPadding, disableScrollParentFix);

@@ -1,6 +1,6 @@
 {
-  "name": "react-joyride",
-  "version": "2.3.0",
+  "name": "@paxful/react-joyride",
+  "version": "2.3.29",
   "description": "Create guided tours for your apps",
   "author": "Gil Barbara <gilbarbara@gmail.com>",
   "repository": {
@@ -131,11 +131,11 @@
   "size-limit": [
     {
       "path": "./es/index.js",
-      "limit": "32 kB"
+      "limit": "35 kB"
     },
     {
       "path": "./lib/index.js",
-      "limit": "32 kB"
+      "limit": "35 kB"
     }
   ],
   "husky": {
@@ -150,8 +150,10 @@
       "jest --findRelatedTests"
     ],
     "*.(css|graphql|js|json|jsx|less|md|mdx|scss|ts|tsx|yaml|yml)": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://artifactory.px.tools/artifactory/api/npm/npm-local/"
   }
 }

@@ -59,11 +59,22 @@ export function getMergedStep(step: StepProps, props: JoyrideProps): ?StepProps 
 
   delete mergedStyles.floaterStyles;
 
-  floaterProps.offset += props.spotlightPadding || step.spotlightPadding || 0;
-
   if (step.placementBeacon) {
     floaterProps.wrapperOptions.placement = step.placementBeacon;
   }
+
+  const isTooltipCentered = step.placement
+    ? ['top', 'left', 'right', 'bottom', 'center'].includes(step.placement)
+    : true;
+
+  const spotlightPadding = props.spotlightPadding || step.spotlightPadding || 0;
+  const tooltipOffset = step.offset || 0;
+
+  floaterProps.options.offset = {
+    offset: isTooltipCentered
+      ? `0, ${spotlightPadding + tooltipOffset}`
+      : `-${tooltipOffset}, ${spotlightPadding + tooltipOffset}`,
+  };
 
   if (scrollParent) {
     floaterProps.options.preventOverflow.boundariesElement = 'window';

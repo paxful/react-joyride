@@ -165,6 +165,8 @@ export interface Step extends CommonProps {
   placementBeacon?: Placement;
   target: string | HTMLElement;
   title?: React.ReactNode;
+  boundaryPadding?: number;
+  isMultiTarget?: boolean;
 }
 
 export interface Props extends CommonProps {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Floater from 'react-floater';
@@ -7,7 +8,7 @@ import is from 'is-lite';
 import { ACTIONS, EVENTS, LIFECYCLE, STATUS } from '../constants';
 
 import { getElement, isElementVisible, hasPosition } from '../modules/dom';
-import { log, hideBeacon } from '../modules/helpers';
+import { log, hideBeacon, getBoundingElementsRect } from '../modules/helpers';
 import { componentTypeWithRefs } from '../modules/propTypes';
 import Scope from '../modules/scope';
 import { validateStep } from '../modules/step';
@@ -35,6 +36,7 @@ export default class JoyrideStep extends React.Component {
     status: PropTypes.string.isRequired,
     step: PropTypes.shape({
       beaconComponent: componentTypeWithRefs,
+      boundaryPadding: PropTypes.number,
       content: PropTypes.node.isRequired,
       disableBeacon: PropTypes.bool,
       disableOverlay: PropTypes.bool,
@@ -51,6 +53,7 @@ export default class JoyrideStep extends React.Component {
       hideCloseButton: PropTypes.bool,
       hideFooter: PropTypes.bool,
       isFixed: PropTypes.bool,
+      isMultiTarget: PropTypes.bool,
       locale: PropTypes.object,
       offset: PropTypes.number.isRequired,
       placement: PropTypes.oneOf([
@@ -87,6 +90,8 @@ export default class JoyrideStep extends React.Component {
       data: [{ key: 'props', value: this.props }],
       debug,
     });
+
+    window.addEventListener('resize', this.handleResize);
   }
 
   componentDidUpdate(prevProps) {
@@ -204,7 +209,16 @@ export default class JoyrideStep extends React.Component {
 
   componentWillUnmount() {
     this.scope.removeScope();
+    window.removeEventListener('resize', this.handleResize);
   }
+
+  handleResize = () => {
+    clearTimeout(this.resizeTimeout);
+
+    this.resizeTimeout = setTimeout(() => {
+      this.forceUpdate();
+    }, 100);
+  };
 
   /**
    * Beacon click/hover event listener
@@ -258,6 +272,26 @@ export default class JoyrideStep extends React.Component {
     return !!(hideBeacon(step) || lifecycle === LIFECYCLE.TOOLTIP);
   }
 
+  renderMultiTargetSelection = step => {
+    const elements = [...document.querySelectorAll(step.target)];
+    const { top, height, left, width } = getBoundingElementsRect(elements);
+
+    return (
+      <Portal>
+        <div
+          style={{
+            position: 'absolute',
+            top,
+            left,
+            width,
+            height,
+          }}
+          id="react-joyride-selection"
+        />
+      </Portal>
+    );
+  };
+
   render() {
     const { continuous, debug, helpers, index, lifecycle, shouldScroll, size, step } = this.props;
     const target = getElement(step.target);
@@ -268,6 +302,7 @@ export default class JoyrideStep extends React.Component {
 
     return (
       <div key={`JoyrideStep-${index}`} className="react-joyride__step">
+        {step.isMultiTarget && this.renderMultiTargetSelection(step)}
         <Portal id="react-joyride-portal">
           <Overlay
             {...step}
@@ -294,7 +329,7 @@ export default class JoyrideStep extends React.Component {
           isPositioned={step.isFixed || hasPosition(target)}
           open={this.open}
           placement={step.placement}
-          target={step.target}
+          target={step.isMultiTarget ? '#react-joyride-selection' : step.target}
           {...step.floaterProps}
         >
           <Beacon
