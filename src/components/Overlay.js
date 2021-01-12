@@ -114,7 +114,6 @@ export default class JoyrideOverlay extends React.Component {
     const top = getElementPosition(element, spotlightPadding, disableScrollParentFix);
 
     return {
-      ...(isLegacy() ? styles.spotlightLegacy : styles.spotlight),
       height: Math.round(elementRect.height + spotlightPadding * 2),
       left: Math.round(elementRect.left - spotlightPadding),
       opacity: showSpotlight ? 1 : 0,
@@ -123,6 +122,7 @@ export default class JoyrideOverlay extends React.Component {
       top,
       transition: 'opacity 0.2s',
       width: Math.round(elementRect.width + spotlightPadding * 2),
+      ...(isLegacy() ? styles.spotlightLegacy : styles.spotlight),
     };
   }
 
