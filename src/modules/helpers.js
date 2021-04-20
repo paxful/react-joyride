@@ -32,13 +32,13 @@ export function getBrowser(userAgent: string = navigator.userAgent): string {
   else if (typeof window.InstallTrigger !== 'undefined') {
     browser = 'firefox';
   }
-  // Chrome 1+
-  else if (window.chrome) {
-    browser = 'chrome';
-  }
   // Safari (and Chrome iOS, Firefox iOS)
   else if (/(Version\/([0-9._]+).*Safari|CriOS|FxiOS| Mobile\/)/.test(userAgent)) {
     browser = 'safari';
+  }
+  // Chrome 1+
+  else if (window.chrome) {
+    browser = 'chrome';
   }
 
   return browser;
